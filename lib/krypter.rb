@@ -28,9 +28,9 @@ class Krypter
 
   def generate_key(secret, salt)
     digest = OpenSSL::Digest.new(@digest)
-    len = digest.digest_length
+    length = digest.digest_length
 
-    return OpenSSL::PKCS5.pbkdf2_hmac(secret, salt, 1000, len, digest)
+    return OpenSSL::PKCS5.pbkdf2_hmac(secret, salt, 1000, length, digest)
   end
 
   def _encrypt(message)
