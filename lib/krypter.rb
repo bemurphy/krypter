@@ -6,8 +6,8 @@ class Krypter
     @cipher = cipher
     @digest = digest
     @separator = separator
-    @encrypt_secret = generate_key(secret, "encryption key")
-    @sign_secret = generate_key(secret, "signin key")
+    @encrypt_secret = derive_key(secret, "encryption key")
+    @sign_secret = derive_key(secret, "signin key")
   end
 
   def encrypt(message)
@@ -26,7 +26,7 @@ class Krypter
 
   private
 
-  def generate_key(secret, salt)
+  def derive_key(secret, salt)
     digest = OpenSSL::Digest.new(@digest)
     length = digest.digest_length
 
