@@ -1,25 +1,22 @@
+require "base64"
 require "openssl"
 
 class Krypter
-  def initialize(secret, cipher: "aes-256-cbc", digest: "SHA1")
+  def initialize(secret, cipher: "aes-256-cbc", hmac: "SHA1", separator: "--")
     @secret = secret
     @cipher = cipher
-    @digest = digest
+    @hmac = hmac
+    @separator = separator
   end
 
   def encrypt(message)
-    ciphertext = _encrypt(message)
-    signature = sign(ciphertext)
-
-    return [signature + ciphertext].pack("m0")
+    return sign(_encrypt(message))
   end
 
   def decrypt(message)
-    decoded = message.unpack("m0").first
-    signature = decoded[0, signature_length]
-    ciphertext = decoded[signature_length .. -1]
+    ciphertext = verify(message)
 
-    if verify(signature, ciphertext)
+    if ciphertext
       return _decrypt(ciphertext)
     else
       return nil
@@ -37,32 +34,42 @@ class Krypter
     encrypted = cipher.update(message)
     encrypted << cipher.final
 
-    return iv + encrypted
+    return sprintf("%s%s%s", encrypted, @separator, iv)
   end
 
   def _decrypt(ciphertext)
+    encrypted, iv = ciphertext.split(@separator)
+
     decipher = OpenSSL::Cipher.new(@cipher)
     decipher.decrypt
     decipher.key = @secret
-    decipher.iv = ciphertext[0, decipher.iv_len]
+    decipher.iv = iv
 
-    encrypted = ciphertext[decipher.iv_len .. -1]
     decrypted = decipher.update(encrypted)
     decrypted << decipher.final
 
     return decrypted
   end
 
-  def sign(message)
-    return OpenSSL::HMAC.digest(@digest, @secret, message)
+  def sign(value)
+    encoded = Base64.strict_encode64(value)
+    signature = hmac(encoded)
+
+    return sprintf("%s%s%s", encoded, @separator, signature)
   end
 
-  def signature_length
-    return OpenSSL::Digest.new(@digest).size
+  def verify(message)
+    value, signature = message.split(@separator)
+
+    if value && signature && secure_compare(signature, hmac(value))
+      return Base64.strict_decode64(value)
+    else
+      return nil
+    end
   end
 
-  def verify(signature, message)
-    return secure_compare(signature, sign(message))
+  def hmac(message)
+    return OpenSSL::HMAC.hexdigest(@hmac, @secret, message)
   end
 
   def secure_compare(a, b)

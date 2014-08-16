@@ -20,20 +20,20 @@ test "encrypt returns different ciphertexts" do |encryptor|
   assert encrypted1 != encrypted2
 end
 
-test "decrypt returns nil when using bad signatures" do |encryptor|
+test "decrypt returns nil when authentication fails" do |encryptor|
   encrypted = encryptor.encrypt("message")
-  signature_length = encryptor.send(:signature_length)
+  separator = encryptor.instance_variable_get(:@separator)
+  ciphertext, signature = encrypted.split(separator)
 
-  decoded = encrypted.unpack("m0").first
-  signature = decoded[0, signature_length]
-  ciphertext = decoded[signature_length .. -1]
-
-  message = [ciphertext + signature].pack("m0")
+  message = [signature, ciphertext] * separator
   assert(encryptor.decrypt(message).nil?)
 
-  message = [signature.reverse + ciphertext].pack("m0")
+  message = [ciphertext, signature.reverse] * separator
   assert(encryptor.decrypt(message).nil?)
 
-  message = [ciphertext.reverse + signature.reverse].pack("m0")
+  message = [ciphertext.reverse, signature] * separator
+  assert(encryptor.decrypt(message).nil?)
+
+  message = [ciphertext.reverse, signature.reverse] * separator
   assert(encryptor.decrypt(message).nil?)
 end
