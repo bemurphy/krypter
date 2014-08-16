@@ -1,5 +1,5 @@
-require "openssl"
 require "base64"
+require "openssl"
 
 class Krypter
   def initialize(secret, cipher: "aes-256-cbc", digest: "SHA1")
