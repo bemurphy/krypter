@@ -2,7 +2,7 @@ require "base64"
 require "openssl"
 
 class Krypter
-  def initialize(secret, cipher: "aes-256-cbc", hmac: "SHA1", separator: "--")
+  def initialize(secret, cipher: "aes-256-cbc", hmac: "SHA256", separator: "--")
     @secret = secret
     @cipher = cipher
     @hmac = hmac
