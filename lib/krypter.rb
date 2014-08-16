@@ -2,11 +2,12 @@ require "base64"
 require "openssl"
 
 class Krypter
-  def initialize(secret, cipher: "aes-256-cbc", hmac: "SHA256", separator: "--")
-    @secret = secret
+  def initialize(secret, cipher: "aes-256-cbc", digest: "SHA256", separator: "--")
     @cipher = cipher
-    @hmac = hmac
+    @digest = digest
     @separator = separator
+    @encrypt_secret = generate_key(secret, "encryption key")
+    @sign_secret = generate_key(secret, "signin key")
   end
 
   def encrypt(message)
@@ -25,10 +26,17 @@ class Krypter
 
   private
 
+  def generate_key(secret, salt)
+    digest = OpenSSL::Digest.new(@digest)
+    len = digest.digest_length
+
+    return OpenSSL::PKCS5.pbkdf2_hmac(secret, salt, 1000, len, digest)
+  end
+
   def _encrypt(message)
     cipher = OpenSSL::Cipher.new(@cipher)
     cipher.encrypt
-    cipher.key = @secret
+    cipher.key = @encrypt_secret
 
     iv = cipher.random_iv
     encrypted = cipher.update(message)
@@ -42,7 +50,7 @@ class Krypter
 
     decipher = OpenSSL::Cipher.new(@cipher)
     decipher.decrypt
-    decipher.key = @secret
+    decipher.key = @encrypt_secret
     decipher.iv = iv
 
     decrypted = decipher.update(encrypted)
@@ -60,6 +68,10 @@ class Krypter
     return sprintf("%s%s%s", encoded, @separator, signature)
   end
 
+  def hmac(message)
+    return OpenSSL::HMAC.hexdigest(@digest, @sign_secret, message)
+  end
+
   def verify(message)
     value, signature = message.split(@separator)
 
@@ -68,10 +80,6 @@ class Krypter
     else
       return nil
     end
-  end
-
-  def hmac(message)
-    return OpenSSL::HMAC.hexdigest(@hmac, @secret, message)
   end
 
   def secure_compare(a, b)
