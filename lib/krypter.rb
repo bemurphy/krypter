@@ -49,6 +49,8 @@ class Krypter
     decrypted << decipher.final
 
     return decrypted
+  rescue OpenSSL::Cipher::CipherError
+    return nil
   end
 
   def sign(value)
