@@ -21,6 +21,8 @@ class Krypter
 
     if verify(signature, ciphertext)
       return _decrypt(ciphertext)
+    else
+      return nil
     end
   end
 
