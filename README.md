@@ -31,7 +31,7 @@ to prevent tampering and chosen ciphertext attacks.
 
 The defaults can be changed when instantiating the encryptor object.
 
-```
+```ruby
 encryptor = Encryptor.new(secret,
   cipher: "aes-256-cbc",
   digest: "SHA256",
