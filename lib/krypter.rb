@@ -2,6 +2,9 @@ require "base64"
 require "openssl"
 
 class Krypter
+  InvalidSignature = Class.new(StandardError)
+  InvalidMessage = Class.new(StandardError)
+
   def initialize(secret, cipher: "aes-256-cbc", digest: "SHA256", separator: "--")
     @cipher = cipher
     @digest = digest
@@ -19,8 +22,6 @@ class Krypter
 
     if ciphertext
       return _decrypt(ciphertext)
-    else
-      return nil
     end
   end
 
@@ -58,7 +59,7 @@ class Krypter
 
     return decrypted
   rescue OpenSSL::Cipher::CipherError
-    return nil
+    raise InvalidMessage
   end
 
   def sign(value)
@@ -78,7 +79,7 @@ class Krypter
     if value && signature && secure_compare(signature, hmac(value))
       return Base64.strict_decode64(value)
     else
-      return nil
+      raise InvalidSignature
     end
   end
 

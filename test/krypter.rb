@@ -26,16 +26,24 @@ test "wrong signature" do |encryptor|
   ciphertext, signature = encrypted.split(separator)
 
   message = [signature, ciphertext] * separator
-  assert(encryptor.decrypt(message).nil?)
+  assert_raise(Krypter::InvalidSignature) do
+    encryptor.decrypt(message)
+  end
 
   message = [ciphertext, signature.reverse] * separator
-  assert(encryptor.decrypt(message).nil?)
+  assert_raise(Krypter::InvalidSignature) do
+    encryptor.decrypt(message)
+  end
 
   message = [ciphertext.reverse, signature] * separator
-  assert(encryptor.decrypt(message).nil?)
+  assert_raise(Krypter::InvalidSignature) do
+    encryptor.decrypt(message)
+  end
 
   message = [ciphertext.reverse, signature.reverse] * separator
-  assert(encryptor.decrypt(message).nil?)
+  assert_raise(Krypter::InvalidSignature) do
+    encryptor.decrypt(message)
+  end
 end
 
 test "tampered data" do |encryptor|
@@ -44,14 +52,22 @@ test "tampered data" do |encryptor|
   ciphertext, iv = encryptor.send(:verify, encrypted).split(separator)
 
   message = encryptor.send(:sign, [iv, ciphertext] * separator)
-  assert(encryptor.decrypt(message).nil?)
+  assert_raise(Krypter::InvalidMessage) do
+    encryptor.decrypt(message)
+  end
 
   message = encryptor.send(:sign, [ciphertext, iv.reverse] * separator)
-  assert(encryptor.decrypt(message).nil?)
+  assert_raise(Krypter::InvalidMessage) do
+    encryptor.decrypt(message)
+  end
 
   message = encryptor.send(:sign, [ciphertext.reverse, iv] * separator)
-  assert(encryptor.decrypt(message).nil?)
+  assert_raise(Krypter::InvalidMessage) do
+    encryptor.decrypt(message)
+  end
 
   message = encryptor.send(:sign, [ciphertext.reverse, iv.reverse] * separator)
-  assert(encryptor.decrypt(message).nil?)
+  assert_raise(Krypter::InvalidMessage) do
+    encryptor.decrypt(message)
+  end
 end

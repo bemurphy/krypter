@@ -20,9 +20,18 @@ encrypted = encryptor.encrypt("message")
 encryptor.decrypt(encrypted) == "message"
 # => true
 
-# If the message is modified, returns nil:
-encryptor.decrypt("modified")
-# => nil
+# If the signature is invalid, it raises
+# a `InvalidSignature` error.
+encryptor.decrypt("")
+# => Krypter::InvalidSignature
+
+# If the message is changed, it raises
+# a `InvalidMessage` error.
+ciphertext, signature = encrypted.split("--")
+ciphertext.reverse!
+
+encryptor.decrypt([ciphertext, signature].join("--"))
+# => Krypter::InvalidMessage
 ```
 
 By default, the messages are encrypted with 256-bit AES in CBC mode
