@@ -20,7 +20,7 @@ test "encrypt returns different ciphertexts" do |encryptor|
   assert encrypted1 != encrypted2
 end
 
-test "decrypt returns nil when authentication fails" do |encryptor|
+test "wrong signature" do |encryptor|
   encrypted = encryptor.encrypt("message")
   separator = encryptor.instance_variable_get(:@separator)
   ciphertext, signature = encrypted.split(separator)
@@ -38,7 +38,7 @@ test "decrypt returns nil when authentication fails" do |encryptor|
   assert(encryptor.decrypt(message).nil?)
 end
 
-test "decrypt returns nil when ciphertext is corrupt" do |encryptor|
+test "tampered data" do |encryptor|
   encrypted = encryptor.encrypt("message")
   separator = encryptor.instance_variable_get(:@separator)
   ciphertext, iv = encryptor.send(:verify, encrypted).split(separator)

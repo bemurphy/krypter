@@ -82,7 +82,7 @@ class Krypter
     end
   end
 
-  # Prevent timing attacks: http://codahale.com/a-lesson-in-timing-attacks/.
+  # Prevents timing attacks: http://codahale.com/a-lesson-in-timing-attacks/.
   def secure_compare(a, b)
     return false unless a.bytesize == b.bytesize
 
