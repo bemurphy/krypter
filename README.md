@@ -17,7 +17,7 @@ require "krypter"
 secret = SecureRandom.hex(32)
 encryptor = Krypter.new(secret)
 encrypted = encryptor.encrypt("message")
-encryptor.decrypt(encrypted) == "message")
+encryptor.decrypt(encrypted) == "message"
 # => true
 
 # If the message is modified, returns nil:
