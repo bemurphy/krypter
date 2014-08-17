@@ -46,15 +46,15 @@ class Krypter
     return [encrypted, iv].join(@separator)
   end
 
-  def _decrypt(ciphertext)
-    encrypted, iv = ciphertext.split(@separator)
+  def _decrypt(encrypted)
+    ciphertext, iv = encrypted.split(@separator)
 
     decipher = OpenSSL::Cipher.new(@cipher)
     decipher.decrypt
     decipher.key = @encrypt_secret
     decipher.iv = iv
 
-    decrypted = decipher.update(encrypted)
+    decrypted = decipher.update(ciphertext)
     decrypted << decipher.final
 
     return decrypted
