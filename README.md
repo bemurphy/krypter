@@ -20,13 +20,11 @@ encrypted = encryptor.encrypt("message")
 encryptor.decrypt(encrypted) == "message"
 # => true
 
-# If the signature is invalid, it raises
-# a `InvalidSignature` error.
+# If the signature is invalid, it raises a `InvalidSignature` error.
 encryptor.decrypt("")
 # => Krypter::InvalidSignature
 
-# If the message is changed, it raises
-# a `InvalidMessage` error.
+# If the message is changed, it raises a `InvalidMessage` error.
 ciphertext, signature = encrypted.split("--")
 ciphertext.reverse!
 
