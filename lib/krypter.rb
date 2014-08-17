@@ -43,7 +43,7 @@ class Krypter
     encrypted = cipher.update(message)
     encrypted << cipher.final
 
-    return sprintf("%s%s%s", encrypted, @separator, iv)
+    return [encrypted, iv].join(@separator)
   end
 
   def _decrypt(ciphertext)
@@ -66,7 +66,7 @@ class Krypter
     encoded = Base64.strict_encode64(value)
     signature = hmac(encoded)
 
-    return sprintf("%s%s%s", encoded, @separator, signature)
+    return [encoded, signature].join(@separator)
   end
 
   def hmac(message)
