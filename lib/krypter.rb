@@ -40,10 +40,10 @@ class Krypter
     cipher.key = @encrypt_secret
 
     iv = cipher.random_iv
-    encrypted = cipher.update(message)
-    encrypted << cipher.final
+    ciphertext = cipher.update(message)
+    ciphertext << cipher.final
 
-    return [encrypted, iv].join(@separator)
+    return [ciphertext, iv].join(@separator)
   end
 
   def _decrypt(encrypted)
