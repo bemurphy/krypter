@@ -9,8 +9,8 @@ class Krypter
     @cipher = cipher
     @digest = digest
     @separator = separator
-    @encrypt_secret = derive_key(secret, "encryption key")
-    @sign_secret = derive_key(secret, "signin key")
+    @encrypt_secret = hmac(secret, "encryption key")
+    @sign_secret = hmac(secret, "signin key")
   end
 
   def encrypt(message)
@@ -27,11 +27,8 @@ class Krypter
 
   private
 
-  def derive_key(secret, salt)
-    digest = OpenSSL::Digest.new(@digest)
-    length = digest.digest_length
-
-    return OpenSSL::PKCS5.pbkdf2_hmac(secret, salt, 1000, length, digest)
+  def hmac(secret, message)
+    return OpenSSL::HMAC.hexdigest(@digest, secret, message)
   end
 
   def _encrypt(message)
@@ -64,19 +61,19 @@ class Krypter
 
   def sign(value)
     encoded = Base64.strict_encode64(value)
-    signature = hmac(encoded)
+    signature = authenticate(encoded)
 
     return [encoded, signature].join(@separator)
   end
 
-  def hmac(message)
-    return OpenSSL::HMAC.hexdigest(@digest, @sign_secret, message)
+  def authenticate(message)
+    return hmac(@sign_secret, message)
   end
 
   def verify(message)
     value, signature = message.split(@separator)
 
-    if value && signature && secure_compare(signature, hmac(value))
+    if value && signature && secure_compare(signature, authenticate(value))
       return Base64.strict_decode64(value)
     else
       raise InvalidSignature
