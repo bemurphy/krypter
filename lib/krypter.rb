@@ -72,6 +72,7 @@ class Krypter
 
   def verify(message)
     value, signature = message.split(@separator)
+    ==
 
     if value && signature && secure_compare(signature, authenticate(value))
       return Base64.strict_decode64(value)
